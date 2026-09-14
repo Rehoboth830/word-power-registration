@@ -58,6 +58,19 @@ const initialState: FormState = {
   expectations: "",
 };
 
+function isValidEmail(value: string) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim());
+}
+
+function isValidNigerianPhone(value: string) {
+  const digits = value.replace(/\D/g, "");
+  // Accepts 10 digits (7031234567) or 11 with a leading 0 (07031234567),
+  // and the local mobile prefixes actually start with 7, 8, or 9.
+  if (digits.length === 10) return /^[789]/.test(digits);
+  if (digits.length === 11) return /^0[789]/.test(digits);
+  return false;
+}
+
 export default function RegistrationModal({
   isOpen,
   onClose,
@@ -67,19 +80,32 @@ export default function RegistrationModal({
 }) {
   const [form, setForm] = useState<FormState>(initialState);
   const [status, setStatus] = useState<Status>("idle");
-  const [fieldError, setFieldError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
 
+  function validate(): Record<string, string> {
+    const next: Record<string, string> = {};
+    if (!form.describes) next.describes = "Please select an option.";
+    if (!isValidNigerianPhone(form.phone)) {
+      next.phone = "Enter a valid phone number, e.g. 0803 123 4567.";
+    }
+    if (!isValidEmail(form.email)) {
+      next.email = "Enter a valid email address.";
+    }
+    return next;
+  }
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    if (!form.describes) {
-      setFieldError("describes");
+    const nextErrors = validate();
+    if (Object.keys(nextErrors).length > 0) {
+      setErrors(nextErrors);
       return;
     }
-    setFieldError(null);
+    setErrors({});
     setStatus("submitting");
     try {
       const res = await fetch(WEBHOOK_URL, {
@@ -170,6 +196,7 @@ export default function RegistrationModal({
                     />
                   </div>
                 </div>
+                {errors.phone && <p className="mt-1.5 text-xs text-red-400">{errors.phone}</p>}
               </FieldWrapper>
 
               <FieldWrapper label="Email address" htmlFor="email">
@@ -181,6 +208,7 @@ export default function RegistrationModal({
                   value={form.email}
                   onChange={(v) => update("email", v)}
                 />
+                {errors.email && <p className="mt-1.5 text-xs text-red-400">{errors.email}</p>}
               </FieldWrapper>
 
               <FieldWrapper
@@ -194,9 +222,7 @@ export default function RegistrationModal({
                   onChange={(v) => update("describes", v)}
                   options={DESCRIBES_OPTIONS}
                 />
-                {fieldError === "describes" && (
-                  <p className="mt-1.5 text-xs text-red-400">Please select an option.</p>
-                )}
+                {errors.describes && <p className="mt-1.5 text-xs text-red-400">{errors.describes}</p>}
               </FieldWrapper>
 
               <FieldWrapper label="How will you be attending?">
