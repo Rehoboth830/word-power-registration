@@ -261,7 +261,7 @@ export default function RegistrationModal({
               <button
                 type="submit"
                 disabled={status === "submitting"}
-                className="mt-2 w-full rounded-[9px] bg-black py-3.5 text-base font-bold text-white transition-colors hover:bg-zinc-900 disabled:opacity-70"
+                className="mt-2 w-full rounded-[9px] bg-white py-3.5 text-base font-bold text-zinc-950 transition-colors hover:bg-zinc-200 disabled:opacity-70"
               >
                 {status === "submitting" ? "Submitting..." : "Submit registration"}
               </button>

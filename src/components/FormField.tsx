@@ -233,7 +233,7 @@ export function ChoiceRow({
           className={`flex flex-1 cursor-pointer items-center gap-2.5 rounded-[9px] border px-3.5 py-3 transition-colors ${
             value === opt.value
               ? "border-wp-teal bg-wp-teal/10"
-              : "border-zinc-700 bg-zinc-900/60"
+              : "border-zinc-600 bg-zinc-800"
           }`}
         >
           <input
@@ -245,7 +245,7 @@ export function ChoiceRow({
             required
             className="accent-wp-teal"
           />
-          <span className="text-[14.5px]">{opt.label}</span>
+          <span className="text-[14.5px] text-white">{opt.label}</span>
         </label>
       ))}
     </div>
