@@ -68,8 +68,11 @@ export function SelectField({
   placeholder?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [highlighted, setHighlighted] = useState(0);
   const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
   const selected = options.find((o) => o.value === value);
+  const listboxId = `${id}-listbox`;
 
   useEffect(() => {
     function handleClick(e: MouseEvent) {
@@ -81,13 +84,53 @@ export function SelectField({
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  function openAt(index: number) {
+    setHighlighted(Math.max(0, Math.min(index, options.length - 1)));
+    setOpen(true);
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent) {
+    if (!open) {
+      if (e.key === "ArrowDown" || e.key === "ArrowUp" || e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        const currentIndex = options.findIndex((o) => o.value === value);
+        openAt(currentIndex >= 0 ? currentIndex : 0);
+      }
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlighted((i) => Math.min(i + 1, options.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlighted((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      onChange(options[highlighted].value);
+      setOpen(false);
+    } else if (e.key === "Escape") {
+      e.preventDefault();
+      setOpen(false);
+      triggerRef.current?.focus();
+    } else if (e.key === "Tab") {
+      setOpen(false);
+    }
+  }
+
   return (
     <div ref={rootRef} className="relative">
       <button
+        ref={triggerRef}
         type="button"
         id={id}
-        onClick={() => setOpen((o) => !o)}
+        role="combobox"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={listboxId}
         aria-required={required}
+        onClick={() => (open ? setOpen(false) : openAt(options.findIndex((o) => o.value === value)))}
+        onKeyDown={handleKeyDown}
         className={`${fieldShell} flex items-center justify-between text-left ${
           !selected ? "text-zinc-500" : ""
         }`}
@@ -107,23 +150,29 @@ export function SelectField({
       <AnimatePresence>
         {open && (
           <motion.ul
+            id={listboxId}
+            role="listbox"
             initial={{ opacity: 0, y: -6, scale: 0.98 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.98 }}
             transition={{ duration: 0.16, ease: [0.16, 1, 0.3, 1] }}
             className="absolute z-20 mt-2 w-full origin-top overflow-hidden rounded-xl border border-zinc-800 bg-zinc-950 py-1.5 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.7)]"
           >
-            {options.map((opt) => (
-              <li key={opt.value}>
+            {options.map((opt, index) => (
+              <li key={opt.value} role="presentation">
                 <button
                   type="button"
+                  role="option"
+                  aria-selected={opt.value === value}
+                  onMouseEnter={() => setHighlighted(index)}
                   onClick={() => {
                     onChange(opt.value);
                     setOpen(false);
+                    triggerRef.current?.focus();
                   }}
-                  className={`flex w-full items-center justify-between px-4 py-3 text-left text-[14.5px] transition-colors hover:bg-zinc-800 ${
-                    opt.value === value ? "text-wp-mint" : "text-zinc-100"
-                  }`}
+                  className={`flex w-full items-center justify-between px-4 py-3 text-left text-[14.5px] transition-colors ${
+                    index === highlighted ? "bg-zinc-800" : ""
+                  } ${opt.value === value ? "text-wp-mint" : "text-zinc-100"}`}
                 >
                   {opt.label}
                   {opt.value === value && (
