@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme {
+  /* Word & Power Conference - brand tokens, pulled from the event flyer */
+  --color-wp-deep: #06201d;
+  --color-wp-mid: #0c332f;
+  --color-wp-teal: #3fc9b4;
+  --color-wp-mint: #8fe3d3;
+  --color-wp-gold: #e8c468;
+  --color-wp-ink: #f2f9f7;
+  --color-wp-ink-dim: #f2f9f7a3;
+  --color-wp-card: #061a18bd;
+  --color-wp-border: #8fe3d329;
+  --color-wp-input: #ffffff0c;
+
+  --font-display: Georgia, "Times New Roman", serif;
+  --font-body: "Segoe UI", ui-sans-serif, system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    color: var(--color-wp-ink);
+    background:
+      radial-gradient(circle at 18% 8%, color-mix(in srgb, var(--color-wp-teal) 20%, transparent), transparent 40%),
+      radial-gradient(circle at 85% 85%, color-mix(in srgb, var(--color-wp-gold) 10%, transparent), transparent 45%),
+      linear-gradient(180deg, var(--color-wp-deep) 0%, var(--color-wp-mid) 55%, var(--color-wp-deep) 100%);
+  }
+}
