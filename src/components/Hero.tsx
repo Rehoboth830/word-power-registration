@@ -40,7 +40,7 @@ export default function Hero({ onRegister }: { onRegister: () => void }) {
           "But we all, with open face beholding as in a glass the glory of the Lord, are changed into the same image."
           <br />- 2 Corinthians 3:18
         </p>
-        <p className="mt-1.5 text-[13px] font-semibold text-wp-gold">Date to be confirmed</p>
+        <p className="mt-1.5 text-[13px] font-semibold text-wp-gold">November 28, 2026</p>
       </motion.div>
     </div>
   );
