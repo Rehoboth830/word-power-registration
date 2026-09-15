@@ -18,12 +18,6 @@
 }
 
 @layer base {
-  html,
-  body,
-  #root {
-    height: 100%;
-  }
-
   body {
     margin: 0;
     font-family: var(--font-body);
@@ -31,6 +25,6 @@
     background:
       radial-gradient(circle at 18% 8%, color-mix(in srgb, var(--color-wp-teal) 20%, transparent), transparent 40%),
       radial-gradient(circle at 85% 85%, color-mix(in srgb, var(--color-wp-gold) 10%, transparent), transparent 45%),
-      linear-gradient(180deg, var(--color-wp-deep) 0%, var(--color-wp-mid) 55%, var(--color-wp-deep) 100%);
+      linear-gradient(180deg, #000000 0%, var(--color-wp-deep) 18%, var(--color-wp-mid) 60%, var(--color-wp-deep) 100%);
   }
 }
