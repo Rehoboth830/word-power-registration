@@ -9,7 +9,7 @@ import {
 } from "./FormField";
 
 // Replace with the real n8n production webhook URL once Phase 4 is live.
-const WEBHOOK_URL = "https://YOUR-N8N-INSTANCE/webhook/rozyc-registration";
+const WEBHOOK_URL = "http://localhost:5679/webhook-test/rozyc-registration";
 
 const DESCRIBES_OPTIONS = [
   { value: "head_lead_pastor", label: "Head of Ministry / Lead Pastor" },
