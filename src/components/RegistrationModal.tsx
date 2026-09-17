@@ -7,9 +7,10 @@ import {
   TextAreaField,
   TextField,
 } from "./FormField";
+import SuccessScreen from "./SuccessScreen";
 
 // Replace with the real n8n production webhook URL once Phase 4 is live.
-const WEBHOOK_URL = "http://localhost:5679/webhook-test/rozyc-registration";
+const WEBHOOK_URL = "http://192.168.107.212:5679/webhook/rozyc-registration";
 
 const DESCRIBES_OPTIONS = [
   { value: "head_lead_pastor", label: "Head of Ministry / Lead Pastor" },
@@ -81,6 +82,7 @@ export default function RegistrationModal({
   const [form, setForm] = useState<FormState>(initialState);
   const [status, setStatus] = useState<Status>("idle");
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitted, setSubmitted] = useState<{ fullName: string; attendance: string } | null>(null);
 
   const update = <K extends keyof FormState>(key: K, value: FormState[K]) =>
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -114,11 +116,21 @@ export default function RegistrationModal({
         body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error("Request failed");
+      setSubmitted({ fullName: form.fullName, attendance: form.attendance });
       setStatus("success");
       setForm(initialState);
     } catch {
       setStatus("error");
     }
+  }
+
+  function handleClose() {
+    onClose();
+    // Reset after the exit animation has time to play
+    setTimeout(() => {
+      setStatus("idle");
+      setSubmitted(null);
+    }, 300);
   }
 
   return (
@@ -129,7 +141,7 @@ export default function RegistrationModal({
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           transition={{ duration: 0.25 }}
-          onClick={onClose}
+          onClick={handleClose}
           className="fixed inset-0 z-50 flex items-end justify-center bg-black/70 backdrop-blur-sm sm:items-center sm:p-6"
         >
           <motion.div
@@ -140,21 +152,29 @@ export default function RegistrationModal({
             onClick={(e) => e.stopPropagation()}
             className="max-h-[92vh] w-full max-w-[520px] overflow-y-auto rounded-t-2xl border border-zinc-800 bg-zinc-950 p-6 pb-8 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.7)] sm:rounded-2xl sm:p-7"
           >
-            <div className="mb-1 flex items-start justify-between">
-              <div>
-                <h2 className="text-lg font-bold text-zinc-100">Register for ROZYC 2026</h2>
-                <p className="text-[13.5px] text-zinc-400">Complete the form below to reserve your seat.</p>
-              </div>
-              <button
-                onClick={onClose}
-                aria-label="Close"
-                className="rounded-full p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                  <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-                </svg>
-              </button>
-            </div>
+            {status === "success" && submitted ? (
+              <SuccessScreen
+                fullName={submitted.fullName}
+                attendance={submitted.attendance}
+                onClose={handleClose}
+              />
+            ) : (
+              <>
+                <div className="mb-1 flex items-start justify-between">
+                  <div>
+                    <h2 className="text-lg font-bold text-zinc-100">Register for ROZYC 2026</h2>
+                    <p className="text-[13.5px] text-zinc-400">Complete the form below to reserve your seat.</p>
+                  </div>
+                  <button
+                    onClick={handleClose}
+                    aria-label="Close"
+                    className="rounded-full p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                      <path d="M2 2l12 12M14 2L2 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                    </svg>
+                  </button>
+                </div>
 
             <form onSubmit={handleSubmit} className="mt-5">
               <FieldWrapper label="Full name" htmlFor="fullName">
@@ -266,17 +286,14 @@ export default function RegistrationModal({
                 {status === "submitting" ? "Submitting..." : "Submit registration"}
               </button>
 
-              {status === "success" && (
-                <p className="mt-3.5 text-center text-[13.5px] text-zinc-400">
-                  You're registered! Check your email for confirmation.
-                </p>
-              )}
               {status === "error" && (
                 <p className="mt-3.5 text-center text-[13.5px] text-zinc-400">
                   Something went wrong - please try again or contact us directly.
                 </p>
               )}
             </form>
+              </>
+            )}
           </motion.div>
         </motion.div>
       )}
