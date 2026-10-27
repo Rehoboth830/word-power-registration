@@ -10,7 +10,7 @@ import {
 import SuccessScreen from "./SuccessScreen";
 
 // Replace with the real n8n production webhook URL once Phase 4 is live.
-const WEBHOOK_URL = "http://192.168.107.212:5679/webhook/rozyc-registration";
+const WEBHOOK_URL = "/api/register";
 
 const DESCRIBES_OPTIONS = [
   { value: "head_lead_pastor", label: "Head of Ministry / Lead Pastor" },
@@ -80,7 +80,7 @@ export default function RegistrationModal({
   onClose: () => void;
 }) {
   const [form, setForm] = useState<FormState>(initialState);
-  const [status, setStatus] = useState<Status>("idle");
+  const [status, setStatus] = useState<Status>("idle"); const [errorMessage, setErrorMessage] = useState("");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitted, setSubmitted] = useState<{ fullName: string; attendance: string } | null>(null);
 
@@ -108,14 +108,14 @@ export default function RegistrationModal({
       return;
     }
     setErrors({});
-    setStatus("submitting");
+    setStatus("submitting"); setErrorMessage("");
     try {
       const res = await fetch(WEBHOOK_URL, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error("Request failed");
+      if (!res.ok) { let msg = ""; try { const data = await res.json(); msg = typeof data.error === "string" ? data.error : ""; } catch { /* no JSON body */ } setErrorMessage(msg); throw new Error("Request failed"); }
       setSubmitted({ fullName: form.fullName, attendance: form.attendance });
       setStatus("success");
       setForm(initialState);
@@ -288,7 +288,7 @@ export default function RegistrationModal({
 
               {status === "error" && (
                 <p className="mt-3.5 text-center text-[13.5px] text-zinc-400">
-                  Something went wrong - please try again or contact us directly.
+                  {errorMessage || "Something went wrong - please try again or contact us directly."}
                 </p>
               )}
             </form>
